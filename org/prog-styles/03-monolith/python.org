@@ -1,12 +1,10 @@
 #+TITLE: Monolith in Python
 #+startup: showeverything
 
-*** TODO Literate programming reading of the example from the book
-    CLOCK: [2014-10-09 木 14:38]
-    CLOCK: [2014-10-09 木 13:50]--[2014-10-09 木 13:55] =>  0:05
-
-# Note: A bit delicate to do literate programming in python
-# due to messing up indentations during tangling step.
+** Implementation
+   
+- Imports and definitions required.
+  Note that we need to run this from the root of the repo.
 
 #+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
 import sys, string, os
@@ -14,14 +12,49 @@ import sys, string, os
 src_root		= "src/exercises-in-programming-style/"
 pride_and_prejudice	= os.path.join(src_root, "pride-and-prejudice.txt")
 stop_words		= os.path.join(src_root, "stop_words.txt")
+#+END_SRC
 
-# the global list of [word, frequency] pairs
+- We hold a global list variable that is used to hold the 
+  =[word, frequency]= pairs associating words with their frequencies.
+  
+#+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
+# the global list of 
 word_freqs = []
-# the list of stop words
+#+END_SRC
+
+- We first read the /stop words/ that we will not consider in the
+  term frequency.
+
+#+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
 with open(stop_words) as f:
     stop_words = f.read().split(',')
-stop_words.extend(list(string.ascii_lowercase))
+#+END_SRC
 
+- We also ignore single letters frequency. The list =string.ascii_lowercase=
+  contains the alphabet, so we can rely on this definition:
+
+#+BEGIN_SRC python :results output code :exports both
+import string
+print list(string.ascii_lowercase)
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC python
+['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+#+END_SRC
+
+We extend the =stop_words= list to include the single letters:
+
+#+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
+stop_words.extend(list(string.ascii_lowercase))
+#+END_SRC
+
+- Scan the file character by character for words.
+  The technique being used here is to accumulate the characters that
+  conform a word until a non alphanumerical value is found.
+  Once we found a word, it becomes acccumulated in the =word_freqs= list.
+
+#+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
 # iterate through the file one line 
 for line in open(pride_and_prejudice):
     start_char = None
@@ -59,15 +92,19 @@ for line in open(pride_and_prejudice):
                 # Let's reset
                 start_char = None
         i += 1
+#+END_SRC
+
+- Finally, we print the results from this search.
+
+#+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
 
 for tf in word_freqs[0:25]:
     print tf[0], ' - ', tf[1]
 #+END_SRC
 
-*** TODO Running the program
+*** DONE Running the program
 
 Match whether the implementation matches the expected results.
-Note that we need to run this from the root of the repo.
 
 #+name: monolith-in-python
 #+BEGIN_SRC sh :results output
@@ -76,3 +113,11 @@ python src/prog-styles/monolith-in-python/run.py
 
 #+RESULTS: monolith-in-python
 #+include: "org/prog-styles/results.org"
+
+** DONE Notes
+
+A bit delicate to do literate programming in python
+due to messing up indentations during tangling step.
+I would have to say that the cookbook style is more suited 
+for doing lp with python than the monolithic style.
+
