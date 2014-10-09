@@ -1,0 +1,8 @@
+# -*- mode: org; mode: auto-fill -*-
+#+TITLE: Exercise in Org
+
+Several attempts at literate programming using Org mode.
+
+- Source of exercises:
+  + Under =org/prog-styles/= :: Crista Lopes excellent /[[https://github.com/crista/exercises-in-programming-style][Exercises in Programming Styles]]/ repository
+

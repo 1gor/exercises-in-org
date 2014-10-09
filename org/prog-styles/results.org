@@ -1,0 +1,38 @@
+#+BEGIN_EXAMPLE text
+mr  -  786
+elizabeth  -  635
+very  -  488
+darcy  -  418
+such  -  395
+mrs  -  343
+much  -  329
+more  -  327
+bennet  -  323
+bingley  -  306
+jane  -  295
+miss  -  283
+one  -  275
+know  -  239
+before  -  229
+herself  -  227
+though  -  226
+well  -  224
+never  -  220
+sister  -  218
+soon  -  216
+think  -  211
+now  -  209
+time  -  203
+good  -  201
+#+END_EXAMPLE
+
+*** COMMENT 
+
+The above code block is meant to be included after then =#+RESULTS= directive
+of the code block which executes the exercise.
+
+The contents are taken directly from the repository at [[https://github.com/crista/exercises-in-programming-style/]]
+
+#+BEGIN_SRC sh :dir ../.. :results output :exports code
+cat src/exercises-in-programming-style/test/pride-and-prejudice.txt
+#+END_SRC
