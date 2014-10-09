@@ -1,8 +1,8 @@
-#+title:   Repositories used for Exercises in Programming Styless
+#+title:   Repositories used for Exercises in Programming Styles
 #+runmode: idempotent
 
 #+name: already-cloned
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :exports none
 [ -e src/exercises-in-programming-style ]
 #+END_SRC
 
