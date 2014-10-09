@@ -104,8 +104,6 @@ for tf in word_freqs[0:25]:
 
 *** DONE Running the program
 
-Match whether the implementation matches the expected results.
-
 #+name: monolith-in-python
 #+BEGIN_SRC sh :results output
 python src/prog-styles/monolith-in-python/run.py
