@@ -1,0 +1,71 @@
+#+TITLE: Monolith in Ruby
+#+TODO: TODO | DONE CANCELED
+#+content: showeverything
+
+*** Requirements
+
+1. Remove the punctuations signs =.';\-"\_=
+2. Remove the empty spaces
+3. Remove the letters from the alphabet
+4. Sort by number of repetitions
+5. Get the 25 words with the most repetition
+6. Reverse the list
+7. Print to stdout
+
+*** Implementation
+
+**** Define the words that have to be filtered
+
+#+BEGIN_SRC ruby  :results output :tangle src/prog-styles/monolith-in-ruby/run.rb :mkdirp true
+  SRC_ROOT		= File.join(File.expand_path("."), "src", "exercises-in-programming-style")
+  PRIDE_AND_PREJUDICE	= File.join(SRC_ROOT, "pride-and-prejudice.txt")
+  STOP_WORDS		= File.join(SRC_ROOT, 'stop_words.txt')
+  @stop_words = File.read(STOP_WORDS).split(',')
+  @stop_words << ('a'..'z').to_a # also alphabet
+  @stop_words.flatten!.uniq!
+#+END_SRC
+
+**** Keep a global list with counters (=@words=)
+
+#+BEGIN_SRC ruby  :results output :tangle src/prog-styles/monolith-in-ruby/run.rb :mkdirp true
+
+  @words = Hash.new {|h,k| h[k] = 0 }
+
+#+END_SRC
+
+**** Scanning the file and filtering stop words
+
+# - Can we count the words without doing the alphanumerical thing?
+
+#+BEGIN_SRC ruby  :results output :tangle src/prog-styles/monolith-in-ruby/run.rb :mkdirp true
+
+  File.read(PRIDE_AND_PREJUDICE).each_line do |line|
+    line.gsub!(/[,.';\-"\_]/, " ")
+    # line.gsub!(/[,.';\-"]/, " ")
+    # line.gsub!(/[,.';"]/, " ")
+    words = line.split(" ")
+    words.each do |w|
+      next if @stop_words.include?(w.downcase)
+      @words[w.downcase] += 1
+    end
+  end
+
+#+END_SRC
+
+**** Sort and pick 25 words
+
+#+BEGIN_SRC ruby  :results output :tangle src/prog-styles/monolith-in-ruby/run.rb :mkdirp true
+  @words.sort {|a,b| a[1] <=> b[1]}.reverse[0..25].each do |k, v|
+    puts "#{k}  -  #{v}"
+  end
+#+END_SRC
+
+**** Expected results
+
+#+name: ruby-monolith
+#+BEGIN_SRC sh
+ruby src/prog-styles/monolith-in-ruby/run.rb
+#+END_SRC
+
+#+RESULTS:
+#+include: "org/prog-styles/results.org"
