@@ -1,8 +1,18 @@
-#+title: Exercises in Programming Style
+#+TITLE: Exercises in Programming Style
 
-*** About 
+*** About
 
-Here it can be found some exercises based from the /[[https://books.google.com/books?isbn=1482227371][Exercises in Programming Styles]]/ book.
+Some exercises based from the /[[https://books.google.com/books?isbn=1482227371][Exercises in Programming Styles]]/ book
+done in at least a different another language than the ones used in
+the book.
+
+*** Setup
+
+Make sure to fetch the [[https://github.com/crista/exercises-in-programming-style][original repository from the book]] to include its results.
+
+#+BEGIN_SRC sh
+org-converge org/prog-styles/repos.org
+#+END_SRC
 
 *** How to run an example
 
@@ -10,7 +20,7 @@ An example is meant to be run at the root level of the /Exercises in
 Org/ repository so that the include directives from Org mode work as
 expected.
 
-There are several ways of running it:
+There are 2 ways of running things.
 
 **** Tangle and then run
 
