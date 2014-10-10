@@ -1,5 +1,5 @@
 # -*- mode: org; mode: auto-fill -*-
-#+TITLE: Exercise in Org
+#+TITLE: Exercises in Org
 
 Several attempts at literate programming using Org mode.
 
