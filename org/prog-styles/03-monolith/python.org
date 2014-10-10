@@ -1,10 +1,9 @@
 #+TITLE: Monolith in Python
 #+startup: showeverything
 
-** Implementation
-   
-- Imports and definitions required.
-  Note that we need to run this from the root of the repo.
+** Imports and definitions
+
+Note that we need to run this from the root of the repo.
 
 #+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
 import sys, string, os
@@ -14,23 +13,21 @@ pride_and_prejudice	= os.path.join(src_root, "pride-and-prejudice.txt")
 stop_words		= os.path.join(src_root, "stop_words.txt")
 #+END_SRC
 
-- We hold a global list variable that is used to hold the 
-  =[word, frequency]= pairs associating words with their frequencies.
-  
-#+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
-word_freqs = []
-#+END_SRC
+** Collect words filter
 
-- We first read the /stop words/ that we will not consider in the
-  term frequency.
+*** Stop words to ignore
+
+We first read the /stop words/ that we will not consider in the term frequency.
 
 #+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
 with open(stop_words) as f:
     stop_words = f.read().split(',')
 #+END_SRC
 
-- We also ignore single letters frequency. The list =string.ascii_lowercase=
-  contains the alphabet, so we can rely on this definition:
+*** Ignore single letters
+
+We also ignore single letters frequency. The list =string.ascii_lowercase= method
+contains the alphabet, so we can rely on this definition:
 
 #+BEGIN_SRC python :results output code :exports both
 import string
@@ -48,10 +45,20 @@ We extend the =stop_words= list to include the single letters:
 stop_words.extend(list(string.ascii_lowercase))
 #+END_SRC
 
-- Scan the file character by character for words line per line.
-  The technique being used here is to accumulate the characters that
-  conform a word until a non alphanumerical value is found.
-  Once we found a word, it becomes acccumulated in the =word_freqs= list.
+** State
+
+We hold a global list variable that is used for the =[word, frequency]= pairs.
+  
+#+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
+word_freqs = []
+#+END_SRC
+
+** Scan the file
+
+Scan the file character by character for words line per line.
+The technique being used here is to accumulate the characters that
+conform a word until a non alphanumerical value is found.
+Once we found a word, it becomes acccumulated in the =word_freqs= list.
 
 #+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
 for line in open(pride_and_prejudice):
@@ -100,7 +107,7 @@ for tf in word_freqs[0:25]:
     print tf[0], ' - ', tf[1]
 #+END_SRC
 
-*** DONE Running the program
+** Run
 
 #+name: monolith-in-python
 #+BEGIN_SRC sh :results output
@@ -110,7 +117,7 @@ python src/prog-styles/monolith-in-python/run.py
 #+RESULTS: monolith-in-python
 #+include: "org/prog-styles/results.org"
 
-** DONE Notes
+** Notes
 
 A bit delicate to do literate programming in python
 due to messing up indentations during tangling step.
