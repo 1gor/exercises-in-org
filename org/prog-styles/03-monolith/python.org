@@ -18,7 +18,6 @@ stop_words		= os.path.join(src_root, "stop_words.txt")
   =[word, frequency]= pairs associating words with their frequencies.
   
 #+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
-# the global list of 
 word_freqs = []
 #+END_SRC
 
@@ -49,13 +48,12 @@ We extend the =stop_words= list to include the single letters:
 stop_words.extend(list(string.ascii_lowercase))
 #+END_SRC
 
-- Scan the file character by character for words.
+- Scan the file character by character for words line per line.
   The technique being used here is to accumulate the characters that
   conform a word until a non alphanumerical value is found.
   Once we found a word, it becomes acccumulated in the =word_freqs= list.
 
 #+BEGIN_SRC python :tangle src/prog-styles/monolith-in-python/run.py :mkdirp true
-# iterate through the file one line 
 for line in open(pride_and_prejudice):
     start_char = None
     i = 0
