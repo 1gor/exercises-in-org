@@ -1,0 +1,77 @@
+#+TITLE: Exercises in Programming Style
+
+*** About
+
+Some exercises based from the /[[https://books.google.com/books?isbn=1482227371][Exercises in Programming Styles]]/ book
+done in at least a different another language than the ones used in
+the book.
+
+*** Setup
+
+Make sure to fetch the [[https://github.com/crista/exercises-in-programming-style][original repository from the book]] to include its results.
+
+#+BEGIN_SRC sh
+org-converge org/prog-styles/repos.org
+#+END_SRC
+
+*** How to run an example
+
+An example is meant to be run at the root level of the /Exercises in
+Org/ repository so that the include directives from Org mode work as
+expected.
+
+There are 2 ways of running things.
+
+**** Tangle and then run
+
+By convention, I put the resulting tangled script under =src/=.
+All documents describe how to run the implementation so we just need
+to follow that:
+
+#+BEGIN_SRC sh
+org-tangle org/prog-styles/03-monolith/python.org --showfiles | grep ".py"
+
+---------- src/prog-styles/monolith-in-python/run.py --------------
+python src/prog-styles/monolith-in-python/run.py
+#+END_SRC
+
+**** Directly with Org Converge
+
+Org Converge makes a document runnable so it is possible to run the
+document itself:
+
+#+BEGIN_SRC sh
+org-run org/prog-styles/03-monolith/python.org 
+#+END_SRC
+
+Also each the main code block has matched expectations to check
+whether it is reproducing the same results as the original version.
+
+#+BEGIN_SRC sh
+org-spec org/prog-styles/03-monolith/python.org 
+
+Checking results from 'monolith-in-python' code block:	OK
+1 examples, 0 failures
+#+END_SRC
+
+In case the results are not expected, a diff would be shown:
+
+#+BEGIN_SRC sh
+org-spec org/prog-styles/03-monolith/ruby.org 
+
+Checking results from 'ruby-monolith' code block:	DIFF
+@@ -1,26 +1,27 @@
+ mr  -  786
+-elizabeth  -  635
++elizabeth  -  631
+ very  -  488
+-darcy  -  418
++darcy  -  397
+ such  -  395
+...
+
+Failed code blocks:
+  - ruby-monolith
+
+1 examples, 1 failures
+#+END_SRC
