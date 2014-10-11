@@ -35,14 +35,10 @@
 
 **** Scanning the file and filtering stop words
 
-# - Can we count the words without doing the alphanumerical thing?
-
 #+BEGIN_SRC ruby  :results output :tangle src/prog-styles/monolith-in-ruby/run.rb :mkdirp true
 
   File.read(PRIDE_AND_PREJUDICE).each_line do |line|
-    line.gsub!(/[,.';\-"\_]/, " ")
-    # line.gsub!(/[,.';\-"]/, " ")
-    # line.gsub!(/[,.';"]/, " ")
+    line.gsub!(/[^a-zA-Z0-9]/, " ") # remove non alphanumeric
     words = line.split(" ")
     words.each do |w|
       next if @stop_words.include?(w.downcase)
@@ -55,7 +51,7 @@
 **** Sort and pick 25 words
 
 #+BEGIN_SRC ruby  :results output :tangle src/prog-styles/monolith-in-ruby/run.rb :mkdirp true
-  @words.sort {|a,b| a[1] <=> b[1]}.reverse[0..25].each do |k, v|
+  @words.sort {|a,b| a[1] <=> b[1]}.reverse[0...25].each do |k, v|
     puts "#{k}  -  #{v}"
   end
 #+END_SRC
