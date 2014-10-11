@@ -61,7 +61,18 @@ Then as part of the reducing step:
 
 Then from this list, we will take the top 25 terms and print them to stdout.
 
+**** The Collection
+
+The collection upon which we will be applying the transformations are
+are each one of the lines that exist in the text.
+
+#+BEGIN_SRC ruby :tangle src/prog-styles/transducers-in-ruby/run.rb
+  lines            = File.read(PRIDE_AND_PREJUDICE).lines
+#+END_SRC
+
 **** The Reducer
+
+From the [[https://github.com/cognitect-labs/transducers-ruby/blob/222686714cc55f984671af48bf506f1c130fc013/lib/transducers.rb#L24][source]]:
 
 #+BEGIN_QUOTE
 A _reducer_ is an object with a `step` method that takes a result
@@ -92,6 +103,21 @@ result sorted by frequency in descending order.
 
 **** The Transducer
 
+Again from the [[https://github.com/cognitect-labs/transducers-ruby/blob/222686714cc55f984671af48bf506f1c130fc013/lib/transducers.rb#L33][source]]:
+
+#+BEGIN_QUOTE
+A _handler_ is an object with a `call` method that a reducer uses
+to process input. In a `map` operation, this would transform the
+input, and in a `filter` operation it would act as a predicate.
+
+A _transducer_ is an object that transforms a reducer by adding
+additional processing for each element in a collection of inputs.
+
+A _transducing process_ is invoked by calling
+`Transducers.transduce` with a transducer, a reducer, an optional
+initial value, and an input collection.
+#+END_QUOTE
+
 Our transducer will compose the functions which filter the
 non-alphanumeric characters that exists on a line, as well as words
 that should be ignored from the text.
@@ -106,13 +132,11 @@ term frequency list.
         line.gsub!(/[^a-zA-Z0-9]/, " ") # remove non alphanumeric
         line.split(' ')                 # split into words
       end,
-      Transducers.map do |words|     # remove stop words
+      Transducers.map do |words|        # remove stop words
         words.delete_if {|w| stop_words.include?(w.downcase) }
       end
     )
 
-    # Prepare the collection of lines and dict to store the frequency of the terms
-    lines            = File.read(PRIDE_AND_PREJUDICE).lines
     words_frequency  = Hash.new {|h,k| h[k] = 0 }
     words_frequency_list = Transducers.transduce(t, frequency_counter, words_frequency, lines)
 #+END_SRC
@@ -138,3 +162,4 @@ bundle exec ruby run.rb
 
 #+RESULTS: transducers-in-ruby
 #+include: "org/prog-styles/results.org"
+
