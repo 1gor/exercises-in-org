@@ -1,13 +1,13 @@
 #+TITLE:   Repositories used for Exercises in Programming Styles
 #+runmode: idempotent
 
-#+name: not-cloned
+#+name: already-cloned
 #+BEGIN_SRC sh :exports none
 [ -e src/exercises-in-programming-style/ ]
 #+END_SRC
 
 #+name:  git-clone
-#+BEGIN_SRC sh :if not-cloned
+#+BEGIN_SRC sh :unless already-cloned
 mkdir -p src/
 cd src
 git clone https://github.com/crista/exercises-in-programming-style
