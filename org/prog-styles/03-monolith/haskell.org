@@ -1,0 +1,114 @@
+#+TITLE: Monolith in Haskell
+
+*** Imports
+
+Importing the modules as =[[http://www.haskell.org/haskellwiki/Importhttp://www.haskell.org/haskellwiki/Import][qualified]]= ([[http://www.haskell.org/haskellwiki/Import_modules_properly][more info on this style]]a):
+
+# #!/usr/bin/env runhaskell
+
+#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+import qualified Control.Monad
+import qualified Data.Char
+import qualified Data.List
+import qualified Data.Text
+import qualified Data.Text.IO
+import qualified System.Directory
+import qualified System.FilePath
+#+END_SRC
+
+*** Definitions
+
+**** Using the IO monad
+
+#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs
+main :: IO ()
+main = do
+#+END_SRC
+
+- Further info on IO usage in Haskell:
+  + IO inside :: <http://www.haskell.org/haskellwiki/IO_inside>
+  + /How to declare an imperative/ paper :: <https://wiki.ittc.ku.edu/lambda_wiki/images/3/3b/Wadler_-_How_to_Declare_an_Imperative.pdf>
+
+- About =do= notation syntactic sugar
+  + http://www.haskell.org/haskellwiki/Keywords#do
+
+**** Location of input files
+
+First, we load up the stop words:
+
+#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+srcRoot <- System.Directory.getCurrentDirectory
+let stopWordsPath          = System.FilePath.joinPath [srcRoot, "src", "exercises-in-programming-style", "stop_words.txt"]
+let prideAndPrejudicePath  = System.FilePath.joinPath [srcRoot, "src", "exercises-in-programming-style", "pride-and-prejudice.txt"]
+#+END_SRC
+
+*** Implementation
+
+**** Prepare the stop words list
+
+We read the comma separated stop words file and define in
+
+#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+stopWordsFile <- Data.Text.IO.readFile stopWordsPath
+let stopWords = Data.Text.split (== ',') stopWordsFile
+
+#+END_SRC
+
+**** Prepare the Pride and Prejudice text
+
+The result of this woud be the pride and prejudice text all in lowercase,
+and with its stop words considered to be removed.
+This is all lazy evaled, which means that we don't necessarily have
+the complete array of the words in the book, and we can expect for the
+compiler to be smarter than that.
+
+#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+
+prideAndPrejudiceFile <- Data.Text.IO.readFile prideAndPrejudicePath
+let prideAndPrejudice =  filter (not . (`elem` stopWords)) $
+                         filter ((> 1) . Data.Text.length) $
+                         Data.Text.split (not . Data.Char.isAlphaNum) $
+                         Data.Text.toLower prideAndPrejudiceFile
+
+#+END_SRC
+
+**** Compute the term frequency
+
+Now that we have a normalized body of text, we can inspect the
+clusters that were created.
+
+Now, we will create the groups in descending order  For this we use
+the =Data.List= module, and we can see that we are also using a bit of
+pattern matching.
+
+#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+
+let groups = Data.List.group $
+             Data.List.sort prideAndPrejudice
+
+let frequencies = Data.List.sortBy (\(_, a) (_, b) -> compare b a) $
+                  map (\xs@(x:_) -> (x, length xs)) groups
+
+
+#+END_SRC
+
+**** Resulting Monad
+
+We make use of the =Control.Monad= to iterate over the 25 terms 
+
+#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+Control.Monad.forM_ (take 25 frequencies) $ \(w, f) ->
+    putStrLn $ Data.Text.unpack w ++ "  -  " ++ show f
+#+END_SRC
+
+*** Run
+
+#+name: run-haskell
+#+BEGIN_SRC sh
+runhaskell src/prog-styles/monolith-in-haskell/run.hs
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_EXAMPLE
+#+include: "org/prog-styles/results.org"
+#+END_EXAMPLE
