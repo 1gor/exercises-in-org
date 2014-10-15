@@ -106,7 +106,5 @@ Control.Monad.forM_ (take 25 frequencies) $ \(w, f) ->
 runhaskell src/prog-styles/monolith-in-haskell/run.hs
 #+END_SRC
 
-#+RESULTS:
-#+BEGIN_EXAMPLE
+#+RESULTS: 
 #+include: "org/prog-styles/results.org"
-#+END_EXAMPLE
