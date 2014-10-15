@@ -2,9 +2,7 @@
 
 *** Imports
 
-Importing the modules as =[[http://www.haskell.org/haskellwiki/Importhttp://www.haskell.org/haskellwiki/Import][qualified]]= ([[http://www.haskell.org/haskellwiki/Import_modules_properly][more info on this style]]a):
-
-# #!/usr/bin/env runhaskell
+    Importing the modules as =[[http://www.haskell.org/haskellwiki/Importhttp://www.haskell.org/haskellwiki/Import][qualified]]=
 
 #+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
 import qualified Control.Monad
