@@ -2,7 +2,7 @@
 
 *** Imports
 
-#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+#+BEGIN_SRC haskell :tangle src/exercises-in-programming-style/03-monolith/tf-03.hs :mkdirp true
 import qualified Control.Monad
 import qualified Data.Char
 import qualified Data.List
@@ -16,7 +16,7 @@ import qualified System.FilePath
 
 **** Using the IO monad
 
-#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs
+#+BEGIN_SRC haskell :tangle src/exercises-in-programming-style/03-monolith/tf-03.hs
 main :: IO ()
 main = do
 #+END_SRC
@@ -32,7 +32,7 @@ main = do
 
 First, we load up the stop words:
 
-#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+#+BEGIN_SRC haskell :tangle src/exercises-in-programming-style/03-monolith/tf-03.hs :mkdirp true
 srcRoot <- System.Directory.getCurrentDirectory
 let stopWordsPath          = System.FilePath.joinPath [srcRoot, "src", "exercises-in-programming-style", "stop_words.txt"]
 let prideAndPrejudicePath  = System.FilePath.joinPath [srcRoot, "src", "exercises-in-programming-style", "pride-and-prejudice.txt"]
@@ -44,7 +44,7 @@ let prideAndPrejudicePath  = System.FilePath.joinPath [srcRoot, "src", "exercise
 
 We read the comma separated stop words file and define in
 
-#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+#+BEGIN_SRC haskell :tangle src/exercises-in-programming-style/03-monolith/tf-03.hs :mkdirp true
 stopWordsFile <- Data.Text.IO.readFile stopWordsPath
 let stopWords = Data.Text.split (== ',') stopWordsFile
 
@@ -58,7 +58,7 @@ This is all lazy evaled, which means that we don't necessarily have
 the complete array of the words in the book, and we can expect for the
 compiler to be smarter than that.
 
-#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+#+BEGIN_SRC haskell :tangle src/exercises-in-programming-style/03-monolith/tf-03.hs :mkdirp true
 
 prideAndPrejudiceFile <- Data.Text.IO.readFile prideAndPrejudicePath
 let prideAndPrejudice =  filter (not . (`elem` stopWords)) $
@@ -77,7 +77,7 @@ Now, we will create the groups in descending order  For this we use
 the =Data.List= module, and we can see that we are also using a bit of
 pattern matching.
 
-#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+#+BEGIN_SRC haskell :tangle src/exercises-in-programming-style/03-monolith/tf-03.hs :mkdirp true
 
 let groups = Data.List.group $
              Data.List.sort prideAndPrejudice
@@ -92,7 +92,7 @@ let frequencies = Data.List.sortBy (\(_, a) (_, b) -> compare b a) $
 
 We make use of the =Control.Monad= to iterate over the 25 terms 
 
-#+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
+#+BEGIN_SRC haskell :tangle src/exercises-in-programming-style/03-monolith/tf-03.hs :mkdirp true
 Control.Monad.forM_ (take 25 frequencies) $ \(w, f) ->
     putStrLn $ Data.Text.unpack w ++ "  -  " ++ show f
 #+END_SRC
@@ -101,7 +101,7 @@ Control.Monad.forM_ (take 25 frequencies) $ \(w, f) ->
 
 #+name: run-haskell
 #+BEGIN_SRC sh
-runhaskell src/prog-styles/monolith-in-haskell/run.hs
+runhaskell src/exercises-in-programming-style/03-monolith/tf-03.hs
 #+END_SRC
 
 #+RESULTS: 
