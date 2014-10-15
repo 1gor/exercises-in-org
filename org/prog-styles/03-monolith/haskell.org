@@ -2,8 +2,6 @@
 
 *** Imports
 
-    Importing the modules as =[[http://www.haskell.org/haskellwiki/Importhttp://www.haskell.org/haskellwiki/Import][qualified]]=
-
 #+BEGIN_SRC haskell :tangle src/prog-styles/monolith-in-haskell/run.hs :mkdirp true
 import qualified Control.Monad
 import qualified Data.Char
