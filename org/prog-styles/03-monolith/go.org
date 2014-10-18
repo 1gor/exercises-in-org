@@ -1,13 +1,14 @@
 #+TITLE:   Go in monolith style
 #+options: todo:t
 
-** TODO Counting words in Go
+** TODO [83%] Counting words in Go
 
-*** TODO read the file line per line
-*** TODO remove anything that is not alphanumeric
-*** TODO count the words
-*** TODO sort by ocurrence
-*** TODO take 25 most repeated terms
+*** DONE [#B] read the file line per line
+*** DONE remove anything that is not alphanumeric
+*** TODO filter ignore words
+*** DONE count the words
+*** DONE sort by ocurrence
+*** DONE take 25 most repeated terms
 
 ** TODO Implementation
 
@@ -173,7 +174,7 @@ go run src/exercises-in-programming-style/03-monolith/tf-03.go
 #+end_src
 
 ** COMMENT Snippets
-
+   
 *** DONE Generating the alphabet in Go
 
 #+BEGIN_SRC go :results output code :imports "fmt"
