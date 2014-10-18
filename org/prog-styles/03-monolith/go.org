@@ -1,0 +1,460 @@
+#+TITLE:   Go in monolith style
+#+options: todo:t
+
+** TODO Counting words in Go
+
+*** TODO read the file line per line
+*** TODO remove anything that is not alphanumeric
+*** TODO count the words
+*** TODO sort by ocurrence
+*** TODO take 25 most repeated terms
+
+** TODO Implementation
+
+#+headers: :dir ../../..
+#+headers: :results output code
+#+headers: :exports both
+#+begin_src go :tangle src/exercises-in-programming-style/03-monolith/tf-03.go 
+  package main
+
+  import (
+          "fmt"
+          "os"
+          ospath "path/filepath"
+          IO "io/ioutil"
+          "bufio"
+          "strings"
+          "bytes"
+          "sort"
+  )
+
+  type wordsSortableByFrequency []*wordWithFrequency
+
+  type wordWithFrequency struct {
+          word string
+          frequency int
+  }
+
+  func (d wordsSortableByFrequency) Len() int {
+          return len(d)
+  }
+
+  func (d wordsSortableByFrequency) Swap(i, j int) {
+          d[i], d[j] = d[j], d[i]
+  }
+
+  func (d wordsSortableByFrequency) Less(i, j int) bool {
+          return d[i].frequency < d[j].frequency
+  }
+
+  func main() {
+          // Get the current path
+          //
+          currentDir, _ := os.Getwd()
+          // TODO: Check the error
+
+          srcRoot := ospath.Join(currentDir, "src", "exercises-in-programming-style")
+
+          // Join the path til the repo with the text
+          //
+          PRIDE_AND_PREJUDICE := ospath.Join(srcRoot, "pride-and-prejudice.txt")
+          STOP_WORDS := ospath.Join(srcRoot, "stop_words.txt")
+
+          // Generate the stop words and put them in an array
+          // in case of stopwords we can just read the file and put in memory
+          //
+          stopWordsContents, _ := IO.ReadFile(STOP_WORDS)
+          stopWordsContents = stopWordsContents[0:(len(stopWordsContents) - 3)] // remove three line breaks at the end
+          // TODO: check the error
+
+          // Split the contents of the file to generate the words to ignore
+          //
+          stopWords := strings.Split(string(stopWordsContents), ",")
+
+
+          // Now merge the single letters too...
+          // Generate the alphabet in capitals:   A..Z is 65..91
+          //
+          for i := 65; i < 91; i++ {
+                  stopWords = append(stopWords, string(i))
+          }
+
+          // Generate the alphabet in lowercase: a..z is 97..123
+          //
+          for i := 97; i < 123; i++ {
+                  stopWords = append(stopWords, string(i))
+          }
+
+          // Leave this one open (defer closing)
+          prideAndPrejudiceTextFile, _ := os.Open(PRIDE_AND_PREJUDICE)
+          defer prideAndPrejudiceTextFile.Close() // we are talking to a compiler
+
+          // For reading the pride and prejudice text, we use a scanner instead
+          prideAndPrejudiceTextReader := bufio.NewReader(prideAndPrejudiceTextFile)
+          scanner := bufio.NewScanner(prideAndPrejudiceTextReader)
+
+          // Define the dictionary with the words hash
+          // TODO
+
+          // Only capture lowercase alphanumeric characters
+          wordFrequency := make(map[string]int)
+          for scanner.Scan() {
+                  line := strings.ToLower(scanner.Text())
+
+                  var wordBuffer bytes.Buffer
+                  for _, c := range line {
+                          if (c >= 97 && c < 123) {       // Filter alphanumeric
+                                  wordBuffer.WriteRune(c)
+                          } else if c == 32 {             // Empty space, meaning that we have a word
+                                  w := wordBuffer.String()
+
+				  // TODO: Ignore if it is a stop word
+				  //
+                                  wordFrequency[w]++      // Accumulate the word
+                                  wordBuffer.Truncate(0)  // reset the buffer
+                          }
+                  }
+          }
+
+          // Turn the wordFrequency map into a list so that entries are comparable?
+          //
+          sortableWordsList := make(wordsSortableByFrequency, 0, len(wordFrequency))
+          for word, frequency := range wordFrequency {
+                  w := wordWithFrequency{ word, frequency }
+                  sortableWordsList = append(sortableWordsList, &w) // pass reference
+          }
+
+          // Sort!
+          //
+          sort.Sort(sort.Reverse(sortableWordsList))
+          for i, w := range sortableWordsList {
+                  fmt.Println(w.word, " - ", w.frequency)
+                  if i > 25 {
+                          break
+                  }
+          }
+  }
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC go
+the  -  4067
+to  -  3906
+of  -  3440
+and  -  3333
+her  -  1966
+i  -  1960
+a  -  1845
+in  -  1785
+was  -  1711
+she  -  1576
+that  -  1459
+it  -  1416
+not  -  1348
+you  -  1301
+he  -  1241
+be  -  1151
+his  -  1149
+as  -  1109
+had  -  1097
+with  -  1022
+for  -  985
+but  -  912
+is  -  830
+have  -  788
+at  -  746
+mr  -  723
+on  -  677
+#+END_SRC
+
+#+name: run-go
+#+begin_src sh
+go run src/exercises-in-programming-style/03-monolith/tf-03.go
+#+end_src
+
+** COMMENT Snippets
+
+*** DONE Generating the alphabet in Go
+
+#+BEGIN_SRC go :results output code :imports "fmt"
+// var stopWords []string
+stopWords :=  make([]string, 0)
+
+// capitals
+for i := 65; i < 91; i++ {
+  // fmt.Print(string(i), ",")
+  stopWords = append(stopWords, string(i))
+}
+
+fmt.Println("")
+
+// lowercase
+for i := 97; i < 123; i++ {
+  stopWords = append(stopWords, string(i))
+}
+
+fmt.Println("Hello world");
+for _, word := range stopWords {
+  fmt.Print(string(word), ",")
+}
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC go
+Hello world
+A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,
+#+END_SRC
+
+*** DONE Removing the last character from a string
+
+#+BEGIN_SRC go :results output  :imports "fmt"
+
+words := "Hello world!"
+words = words[0:len(words) - 1]
+
+fmt.Println(words)
+#+END_SRC
+
+#+RESULTS:
+: Hello world
+
+*** DONE Remove characters in line that are not alphanumeric, sort, and take 5
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2014-10-18 土 15:30
+  :ARCHIVE_FILE: ~/repos/exercises-in-org/org/prog-styles/03-monolith/go.org
+  :ARCHIVE_OLPATH: Snippets
+  :ARCHIVE_CATEGORY: go
+  :ARCHIVE_TODO: TODO
+  :END:
+
+#+BEGIN_SRC go :results output
+  package main
+
+  import (
+          "fmt"
+          "strings"
+          "bytes"
+          "sort"
+  )
+
+  type wordsSortableByFrequency []*wordWithFrequency
+
+  type wordWithFrequency struct {
+          word string
+          frequency int
+  }
+
+  func (d wordsSortableByFrequency) Len() int {
+          return len(d)
+  }
+
+  func (d wordsSortableByFrequency) Swap(i, j int) {
+          d[i], d[j] = d[j], d[i]
+  }
+
+  func (d wordsSortableByFrequency) Less(i, j int) bool {
+          return d[i].frequency < d[j].frequency
+  }
+
+  func main() {
+          rawLine := "a a a a a a a a a a a a a almost no restrictions whatsoever.  You may copy it, give it away or"
+          line := strings.ToLower(rawLine)
+          fmt.Println(line)
+          fmt.Println("------------------- char by char -------------------------")
+          fmt.Println("")
+
+          // Only print lowercase alphanumeric
+          wordFrequency := make(map[string]int)
+          var wordBuffer bytes.Buffer
+          for _, c := range line {
+                  if (c >= 97 && c < 123) {       // Filter alphanumeric
+                          wordBuffer.WriteRune(c)
+                  } else if c == 32 {             // Empty space, meaning that we have a word
+                          // Accumulate the word
+                          w := wordBuffer.String()
+                          wordFrequency[w]++
+                          wordBuffer.Truncate(0) // reset the buffer
+                  }
+          }
+
+          // Turn the wordFrequency map into a list so that entries are comparable?
+          //
+          sortableWordsList := make(wordsSortableByFrequency, 0, len(wordFrequency))
+          for word, frequency := range wordFrequency {
+                  w := wordWithFrequency{ word, frequency }
+                  sortableWordsList = append(sortableWordsList, &w) // pass reference
+          }
+
+          // Sort!
+          //
+          sort.Sort(sort.Reverse(sortableWordsList))
+          for i, w := range sortableWordsList {
+                  fmt.Println(w.word, " - ", w.frequency)
+                  if i > 5 {
+                          break
+                  }
+          }
+  }
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+a a a a a a a a a a a a a almost no restrictions whatsoever.  you may copy it, give it away or
+------------------- char by char -------------------------
+
+a  -  13
+it  -  2
+  -  1
+away  -  1
+give  -  1
+no  -  1
+restrictions  -  1
+#+end_example
+
+*** DONE Reading files in Go
+    :PROPERTIES:
+    :ORDERED:  t
+    :END:
+
+#+headers: :dir ../../..
+#+headers: :results output code
+#+begin_src go :tangle src/exercises-in-programming-style/03-monolith/tf-03.go 
+  package main
+
+  import (
+          "fmt"
+          "os"
+          ospath "path/filepath"
+          IO "io/ioutil"
+          "bufio"
+          "strings"
+  )
+
+  func main() {
+          // Get the current path
+          //
+          currentDir, _ := os.Getwd()
+          // TODO: Check the error
+
+          srcRoot := ospath.Join(currentDir, "src", "exercises-in-programming-style")
+          fmt.Println("Files are at:", srcRoot)
+
+          // Join the path til the repo with the text
+          //
+          PRIDE_AND_PREJUDICE := ospath.Join(srcRoot, "pride-and-prejudice.txt")
+          STOP_WORDS := ospath.Join(srcRoot, "stop_words.txt")
+
+          // Generate the stop words and put them in an array
+          // in case of stopwords we can just read the file and put in memory
+          //
+          stopWordsContents, _ := IO.ReadFile(STOP_WORDS)
+          stopWordsContents = stopWordsContents[0:(len(stopWordsContents) - 3)] // remove three line breaks at the end
+          // TODO: check the error
+
+          // Split the contents of the file to generate the words to ignore
+          //
+          stopWords := strings.Split(string(stopWordsContents), ",")
+
+
+          // Now merge the single letters too... 
+          // Generate the alphabet in capitals:   A..Z is 65..91
+          //
+          for i := 65; i < 91; i++ {
+                  stopWords = append(stopWords, string(i))
+          }
+
+          // Generate the alphabet in lowercase: a..z is 97..123
+          // 
+          for i := 97; i < 123; i++ {
+                  stopWords = append(stopWords, string(i))
+          }
+
+          // Leave this one open (defer closing)
+          prideAndPrejudiceTextFile, _ := os.Open(PRIDE_AND_PREJUDICE)
+          defer prideAndPrejudiceTextFile.Close() // we are talking to a compiler
+
+          // For reading the pride and prejudice text, we use a scanner instead
+          prideAndPrejudiceTextReader := bufio.NewReader(prideAndPrejudiceTextFile)
+          scanner := bufio.NewScanner(prideAndPrejudiceTextReader)
+
+          // Define the dictionary with the words hash
+          // TODO
+
+          // Read line per line
+          // (how to read only one ine)
+          i := 0
+          for scanner.Scan() {
+            line := scanner.Text()
+
+            fmt.Println(line)
+            //words := strings.Split(line, " ")
+            //for _, word := range words {
+            //fmt.Println(word)
+            //}
+
+            // remove non alphanumeric characters from the line
+            i++
+            if i > 3 {
+              break
+            }
+          }
+          // for line, _ := range prideAndPrejudiceTextFile {
+          //   fmt.Println(line)
+          // }
+
+  }
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC go
+Files are at: /home/wallyqs/repos/exercises-in-org/src/exercises-in-programming-style
+﻿The Project Gutenberg EBook of Pride and Prejudice, by Jane Austen
+﻿The
+Project
+Gutenberg
+EBook
+of
+Pride
+and
+Prejudice,
+by
+Jane
+Austen
+
+
+This eBook is for the use of anyone anywhere at no cost and with
+This
+eBook
+is
+for
+the
+use
+of
+anyone
+anywhere
+at
+no
+cost
+and
+with
+almost no restrictions whatsoever.  You may copy it, give it away or
+almost
+no
+restrictions
+whatsoever.
+
+You
+may
+copy
+it,
+give
+it
+away
+or
+#+END_SRC
+
+#+name: run-go
+#+begin_src sh
+go run src/exercises-in-programming-style/03-monolith/tf-03.go
+#+end_src
