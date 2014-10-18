@@ -1,9 +1,11 @@
 #+title: pep8 formatting
-#+runmode:
+#+runmode: idempotent
 
-* Beautifier
+*** Source
 
 Source of the tool at: <https://github.com/hhatto/autopep8>
+
+*** Install
 
 #+name: pep8-already-installed
 #+BEGIN_SRC sh
@@ -14,6 +16,8 @@ which autopep8
 #+BEGIN_SRC sh :unless pep8-already-installed
 sudo pip install --upgrade autopep8
 #+END_SRC
+
+*** Usage
 
 #+name: pep8-formatting
 #+BEGIN_SRC sh :results output
