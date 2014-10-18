@@ -1,6 +1,7 @@
 #+TITLE: Monolith in Python
 #+startup: showeverything
 
+* Counting words in Pride in Prejudice with Python
 ** Imports and definitions
 
 Note that we need to run this from the root of the repo.
@@ -123,4 +124,3 @@ A bit delicate to do literate programming in python
 due to messing up indentations during tangling step.
 I would have to say that the cookbook style is more suited 
 for doing lp with python than the monolithic style.
-

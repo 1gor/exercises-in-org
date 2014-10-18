@@ -1,0 +1,26 @@
+#+title: pep8 formatting
+#+runmode:
+
+* Beautifier
+
+Source of the tool at: <https://github.com/hhatto/autopep8>
+
+#+name: pep8-already-installed
+#+BEGIN_SRC sh
+which autopep8
+#+END_SRC
+
+#+name: pep8-compliance
+#+BEGIN_SRC sh :unless pep8-already-installed
+sudo pip install --upgrade autopep8
+#+END_SRC
+
+#+name: pep8-formatting
+#+BEGIN_SRC sh :results output
+for example in `ls src/exercises-in-programming-style/*/*.py`; do
+  autopep8 -i $example
+done
+#+END_SRC
+
+
+
