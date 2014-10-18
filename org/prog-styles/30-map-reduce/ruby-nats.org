@@ -16,7 +16,7 @@ gem 'nats', '0.5.0.beta.14'
 bundle install
 #+END_SRC
 
-*** Starts NATS server
+*** Start the NATS server
 
 Ruby clients would connect to this to coordinate the computation:
 
@@ -24,6 +24,7 @@ Ruby clients would connect to this to coordinate the computation:
 #+BEGIN_SRC sh :results output :dir src/prog-styles/map-reduce-via-nats/
 bundle exec nats-server
 #+END_SRC
+
 *** Aggregator
 
 This process will be in charge of dispatching a range of the lines
@@ -147,7 +148,7 @@ and reply with the partial computed frequency when done.
 Delay the start of the process so that the nats server and aggregator are ready.
 
 #+name: frequency-counter
-#+BEGIN_SRC ruby :procs 30 :sleep 5
+#+BEGIN_SRC ruby :procs 3 :sleep 5
   require 'nats/client'
   require 'securerandom'
   require 'json'
@@ -253,3 +254,4 @@ p @chunks
 : total  chunks: 4475
 : out of chunk:  1
 : {1=>{:start=>0, :end=>4475, :done=>false}, 2=>{:start=>4476, :end=>8951, :done=>false}, 3=>{:start=>8952, :end=>13426, :done=>false}}
+

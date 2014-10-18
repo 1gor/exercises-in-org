@@ -106,3 +106,7 @@ runhaskell src/exercises-in-programming-style/03-monolith/tf-03.hs
 
 #+RESULTS: 
 #+include: "org/prog-styles/results.org"
+
+*** Thanks
+
+Thanks to [[https://github.com/yamadapc][yamadapc]] for the great intro to Haskell and sharing this example :)
