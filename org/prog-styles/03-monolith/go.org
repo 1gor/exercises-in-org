@@ -1,21 +1,22 @@
 #+TITLE:   Go in monolith style
 #+options: todo:t
 
-** TODO [83%] Counting words in Go
+** TODO [85%] Counting words in Go
 
 *** DONE [#B] read the file line per line
 *** DONE remove anything that is not alphanumeric
-*** TODO filter ignore words
+*** DONE filter ignore words
 *** DONE count the words
 *** DONE sort by ocurrence
 *** DONE take 25 most repeated terms
 
+*** TODO Pass the test
 ** TODO Implementation
 
 #+headers: :dir ../../..
 #+headers: :results output code
 #+headers: :exports both
-#+begin_src go :tangle src/exercises-in-programming-style/03-monolith/tf-03.go 
+#+begin_src go :tangle src/exercises-in-programming-style/03-monolith/tf-03.go :exports both
   package main
 
   import (
@@ -70,17 +71,10 @@
 
           // Split the contents of the file to generate the words to ignore
           //
-          stopWords := strings.Split(string(stopWordsContents), ",")
-
+          stopWords := strings.Split(strings.ToLower(string(stopWordsContents)), ",")
 
           // Now merge the single letters too...
-          // Generate the alphabet in capitals:   A..Z is 65..91
-          //
-          for i := 65; i < 91; i++ {
-                  stopWords = append(stopWords, string(i))
-          }
-
-          // Generate the alphabet in lowercase: a..z is 97..123
+          // Generate the alphabet in lowercase: a..z (97..123 in ascii)
           //
           for i := 97; i < 123; i++ {
                   stopWords = append(stopWords, string(i))
@@ -88,34 +82,37 @@
 
           // Leave this one open (defer closing)
           prideAndPrejudiceTextFile, _ := os.Open(PRIDE_AND_PREJUDICE)
-          defer prideAndPrejudiceTextFile.Close() // we are talking to a compiler
+          defer prideAndPrejudiceTextFile.Close()
 
           // For reading the pride and prejudice text, we use a scanner instead
+	  //
           prideAndPrejudiceTextReader := bufio.NewReader(prideAndPrejudiceTextFile)
           scanner := bufio.NewScanner(prideAndPrejudiceTextReader)
 
-          // Define the dictionary with the words hash
-          // TODO
-
           // Only capture lowercase alphanumeric characters
+	  //
           wordFrequency := make(map[string]int)
+          var wordBuffer bytes.Buffer
           for scanner.Scan() {
                   line := strings.ToLower(scanner.Text())
 
-                  var wordBuffer bytes.Buffer
                   for _, c := range line {
-                          if (c >= 97 && c < 123) {       // Filter alphanumeric
+                          if (c >= 97 && c <= 123) {       // Filter alphanumeric
                                   wordBuffer.WriteRune(c)
                           } else if c == 32 {             // Empty space, meaning that we have a word
                                   w := wordBuffer.String()
 
-				  // TODO: Ignore if it is a stop word
-				  //
                                   wordFrequency[w]++      // Accumulate the word
                                   wordBuffer.Truncate(0)  // reset the buffer
                           }
                   }
           }
+
+	  // Remove the words that should be ignored
+	  // 
+	  for _, word := range stopWords {
+	    delete(wordFrequency, word)
+	  }
 
           // Turn the wordFrequency map into a list so that entries are comparable?
           //
@@ -137,41 +134,15 @@
   }
 #+END_SRC
 
-#+RESULTS:
-#+BEGIN_SRC go
-the  -  4067
-to  -  3906
-of  -  3440
-and  -  3333
-her  -  1966
-i  -  1960
-a  -  1845
-in  -  1785
-was  -  1711
-she  -  1576
-that  -  1459
-it  -  1416
-not  -  1348
-you  -  1301
-he  -  1241
-be  -  1151
-his  -  1149
-as  -  1109
-had  -  1097
-with  -  1022
-for  -  985
-but  -  912
-is  -  830
-have  -  788
-at  -  746
-mr  -  723
-on  -  677
+** TODO Run it
+
+#+NAME: run-go
+#+BEGIN_SRC sh
+go run src/exercises-in-programming-style/03-monolith/tf-03.go
 #+END_SRC
 
-#+name: run-go
-#+begin_src sh
-go run src/exercises-in-programming-style/03-monolith/tf-03.go
-#+end_src
+#+RESULTS:
+#+INCLUDE: "org/prog-styles/results.org"
 
 ** COMMENT Snippets
    
@@ -357,7 +328,6 @@ restrictions  -  1
           //
           stopWords := strings.Split(string(stopWordsContents), ",")
 
-
           // Now merge the single letters too... 
           // Generate the alphabet in capitals:   A..Z is 65..91
           //
@@ -459,3 +429,173 @@ or
 #+begin_src sh
 go run src/exercises-in-programming-style/03-monolith/tf-03.go
 #+end_src
+
+*** TODO Check if word is already included
+
+#+HEADERS: :dir ../../..
+#+HEADERS: :results output code
+#+BEGIN_SRC go
+  package main
+
+  import (
+          "fmt"
+          "os"
+          ospath "path/filepath"
+          IO "io/ioutil"
+          "strings"
+  )
+
+  func main() {
+          // Get the current path
+          //
+          currentDir, _ := os.Getwd()
+          // TODO: Check the error
+
+          srcRoot := ospath.Join(currentDir, "src", "exercises-in-programming-style")
+          fmt.Println("Files are at:", srcRoot)
+
+          // Join the path til the repo with the text
+          //
+          // PRIDE_AND_PREJUDICE := ospath.Join(srcRoot, "pride-and-prejudice.txt")
+          STOP_WORDS := ospath.Join(srcRoot, "stop_words.txt")
+
+          // Generate the stop words and put them in an array
+          // in case of stopwords we can just read the file and put in memory
+          //
+          stopWordsContents, _ := IO.ReadFile(STOP_WORDS)
+          stopWordsContents = stopWordsContents[0:(len(stopWordsContents) - 3)] // remove three line breaks at the end
+          // TODO: check the error
+
+          // Split the contents of the file to generate the words to ignore
+          //
+          stopWords := strings.Split(string(stopWordsContents), ",")
+          for _, word := range stopWords {
+                  fmt.Println(word)
+          }
+  }
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC go
+Files are at: /home/wallyqs/repos/exercises-in-org/src/exercises-in-programming-style
+a
+able
+about
+across
+after
+all
+almost
+also
+am
+among
+an
+and
+any
+are
+as
+at
+be
+because
+been
+but
+by
+can
+cannot
+could
+dear
+did
+do
+does
+either
+else
+ever
+every
+for
+from
+get
+got
+had
+has
+have
+he
+her
+hers
+him
+his
+how
+however
+i
+if
+in
+into
+is
+it
+its
+just
+least
+let
+like
+likely
+may
+me
+might
+most
+must
+my
+neither
+no
+nor
+not
+of
+off
+often
+on
+only
+or
+other
+our
+own
+rather
+said
+say
+says
+she
+should
+since
+so
+some
+than
+that
+the
+their
+them
+then
+there
+these
+they
+this
+tis
+to
+too
+twas
+us
+wants
+was
+we
+were
+what
+when
+where
+which
+while
+who
+whom
+why
+will
+with
+would
+yet
+you
+your
+#+END_SRC
+
