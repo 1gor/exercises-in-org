@@ -1,7 +1,6 @@
 #+TITLE:   Go in monolith style
-#+options: todo:t
 
-** COMMENT [85%] Counting words in Go
+** COMMENT [100%] Counting words in Go
 
 *** DONE [#B] read the file line per line
 *** DONE remove anything that is not alphanumeric
@@ -10,7 +9,7 @@
 *** DONE sort by ocurrence
 *** DONE take 25 most repeated terms
 
-*** TODO Pass the test
+*** DONE Pass the test
 ** TODO Implementation
 
 #+headers: :dir ../../..
@@ -85,34 +84,41 @@
           defer prideAndPrejudiceTextFile.Close()
 
           // For reading the pride and prejudice text, we use a scanner instead
-	  //
+          //
           prideAndPrejudiceTextReader := bufio.NewReader(prideAndPrejudiceTextFile)
           scanner := bufio.NewScanner(prideAndPrejudiceTextReader)
 
           // Only capture lowercase alphanumeric characters
-	  //
+          //
           wordFrequency := make(map[string]int)
           var wordBuffer bytes.Buffer
+
           for scanner.Scan() {
                   line := strings.ToLower(scanner.Text())
 
                   for _, c := range line {
-                          if (c >= 97 && c <= 123) {       // Filter alphanumeric
+                          if c >= 97 && c <= 123 { // Filter alphanumeric
                                   wordBuffer.WriteRune(c)
-                          } else if c == 32 {             // Empty space, meaning that we have a word
-                                  w := wordBuffer.String()
-
-                                  wordFrequency[w]++      // Accumulate the word
-                                  wordBuffer.Truncate(0)  // reset the buffer
+                          } else {
+                                  if w := wordBuffer.String(); len(w) > 0 {
+                                          wordFrequency[w]++
+                                  }
+                                  wordBuffer.Truncate(0)
                           }
+                  }
+
+                  // Flush the buffer once again after scanning a line
+                  if w := wordBuffer.String(); len(w) > 0 {
+                          wordFrequency[w]++
+                          wordBuffer.Truncate(0)
                   }
           }
 
-	  // Remove the words that should be ignored
-	  // 
-	  for _, word := range stopWords {
-	    delete(wordFrequency, word)
-	  }
+          // Remove the words that should be ignored
+          //
+          for _, word := range stopWords {
+            delete(wordFrequency, word)
+          }
 
           // Turn the wordFrequency map into a list so that entries are comparable?
           //
@@ -127,58 +133,25 @@
           sort.Sort(sort.Reverse(sortableWordsList))
           for i, w := range sortableWordsList {
                   fmt.Println(w.word, " - ", w.frequency)
-                  if i > 25 {
+                  if i >= 24 {
                           break
                   }
           }
   }
 #+END_SRC
 
-** TODO Run it
+** DONE Run it
 
 #+NAME: run-go
 #+BEGIN_SRC sh :results output :exports both
 go run src/exercises-in-programming-style/03-monolith/tf-03.go
 #+END_SRC
 
-Wrong...
-
-#+RESULTS: run-go
-#+begin_example
-mr  -  623
-very  -  404
-  -  394
-elizabeth  -  386
-such  -  329
-darcy  -  306
-much  -  280
-more  -  275
-mrs  -  263
-bennet  -  244
-one  -  227
-miss  -  223
-jane  -  211
-know  -  209
-bingley  -  206
-never  -  188
-though  -  187
-before  -  186
-soon  -  186
-think  -  184
-herself  -  178
-now  -  176
-time  -  169
-well  -  164
-without  -  150
-little  -  149
-sister  -  146
-#+end_example
-
 #+RESULTS:
 #+INCLUDE: "org/prog-styles/results.org"
 
 ** COMMENT Snippets
-   
+
 *** DONE Generating the alphabet in Go
 
 #+BEGIN_SRC go :results output code :imports "fmt"
@@ -324,7 +297,7 @@ restrictions  -  1
 
 #+headers: :dir ../../..
 #+headers: :results output code
-#+begin_src go :tangle src/exercises-in-programming-style/03-monolith/tf-03.go 
+#+begin_src go :tangle src/exercises-in-programming-style/03-monolith/tf-03.go
   package main
 
   import (
@@ -361,7 +334,7 @@ restrictions  -  1
           //
           stopWords := strings.Split(string(stopWordsContents), ",")
 
-          // Now merge the single letters too... 
+          // Now merge the single letters too...
           // Generate the alphabet in capitals:   A..Z is 65..91
           //
           for i := 65; i < 91; i++ {
@@ -369,7 +342,7 @@ restrictions  -  1
           }
 
           // Generate the alphabet in lowercase: a..z is 97..123
-          // 
+          //
           for i := 97; i < 123; i++ {
                   stopWords = append(stopWords, string(i))
           }
