@@ -1,7 +1,7 @@
 #+TITLE:   Go in monolith style
 #+options: todo:t
 
-** TODO [85%] Counting words in Go
+** COMMENT [85%] Counting words in Go
 
 *** DONE [#B] read the file line per line
 *** DONE remove anything that is not alphanumeric
@@ -137,9 +137,42 @@
 ** TODO Run it
 
 #+NAME: run-go
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :results output :exports both
 go run src/exercises-in-programming-style/03-monolith/tf-03.go
 #+END_SRC
+
+Wrong...
+
+#+RESULTS: run-go
+#+begin_example
+mr  -  623
+very  -  404
+  -  394
+elizabeth  -  386
+such  -  329
+darcy  -  306
+much  -  280
+more  -  275
+mrs  -  263
+bennet  -  244
+one  -  227
+miss  -  223
+jane  -  211
+know  -  209
+bingley  -  206
+never  -  188
+though  -  187
+before  -  186
+soon  -  186
+think  -  184
+herself  -  178
+now  -  176
+time  -  169
+well  -  164
+without  -  150
+little  -  149
+sister  -  146
+#+end_example
 
 #+RESULTS:
 #+INCLUDE: "org/prog-styles/results.org"
