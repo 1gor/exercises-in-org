@@ -1,0 +1,10 @@
+#+TITLE: Counting words in Clojure
+
+#+BEGIN_SRC clojure :tangle  src/prog-styles/monolith-in-clojure/profiles.clj :mkdirp true
+{:user {:plugins [[cider/cider-nrepl "0.7.0"]]}}
+#+END_SRC
+
+#+name: run-clojure
+#+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure/monolith
+lein run
+#+END_SRC
