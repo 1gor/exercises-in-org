@@ -1,14 +1,33 @@
-#+TITLE: Counting words in Golang
+#+TITLE: Counting words in Go lang
 
-* TODO _
-** COMMENT Implementation
+** Golang monolith version
 
 *** Start the NATS server
+
+From a docker container:
 
 #+name: nats-server
 #+BEGIN_SRC sh :results output code
 sudo docker run -p 4222:4222 apcera/gnatsd
 #+END_SRC
+
+The channels involved for the counting words job
+to be distributed are:
+
+- =pride-prejudice.discovery= ::
+   Used to discover counting nodes that exist within the system.
+   Nodes that can compute words send a payload with their =id=.
+   Note: In a truly distributed run, they would announce more info
+   such as where in the datacenter are they located.
+
+- =pride-prejudice.requests= :: 
+   Used by the aggregator to announce to nodes that a computation is needed to be done.
+
+- =pride-prejudice.id.compute= ::
+   Used by the aggregator to dispatch counting words requests to the node that id.
+     
+- =pride-prejudice.responses= ::
+   Used by the aggregator to receive the computation and accumulate the results.
 
 *** Aggregator
 
@@ -16,12 +35,8 @@ This process will be in charge of dispatching a range of the lines
 in the text and dispatch the task to another node so that it computes
 the word frequency computation.
 
-# Wait a bit for the computing nodes to be ready
-# TODO: should be done by an outer layer, 
-#       wait for nats job to register itself and be available
-
 #+name: aggregator
-#+begin_src ruby :sleep 4
+#+begin_src ruby :sleep 5
   require 'nats/client'
   require 'json'
 
@@ -125,90 +140,14 @@ the word frequency computation.
   }
 #+END_SRC
 
-*** Word Frequency Counter
+*** TODO Word Frequency Counter
 
-This will receive a chunk of words to process,
-and reply with the partial computed frequency when done.
+This will receive a chunk of words to process, and reply 
+with the partial computed frequency when done.
 
 Delay the start of the process so that the nats server and aggregator are ready.
 
-- Channels involved
-  + =pride-prejudice.discovery=
-  + =pride-prejudice.requests=
-  + =pride-prejudice.id.compute=
-  + =pride-prejudice.responses=
-
-**** COMMENT Ruby version
-
-#+name: frequency-counter
-#+BEGIN_SRC ruby :procs 3 :sleep 5
-  require 'nats/client'
-  require 'securerandom'
-  require 'json'
-
-  $stdout.sync = true
-  ["TERM", "INT"].each { |sig| trap(sig) { NATS.stop } }
-  SRC_ROOT = File.join(File.expand_path("."), "src", "exercises-in-programming-style")
-  PRIDE_AND_PREJUDICE = File.join(SRC_ROOT, "pride-and-prejudice.txt")
-
-  ID   = SecureRandom.uuid
-  INFO = {'id' => ID }
-
-  def compute(range)
-    range_start     = range['start'].to_i
-    range_end       = range['end'].to_i
-    stop_words      = range['stop_words']
-    words_frequency = Hash.new {|h,k| h[k] = 0 }
-
-    # Read local copy of the document and fetch that range of lines
-    lines = File.read(PRIDE_AND_PREJUDICE).lines[range_start..range_end]
-    lines.each do |line|
-      line.gsub!(/[^a-zA-Z0-9]/, " ") # remove non alphanumeric
-      words = line.split(" ")
-      words.each do |w|
-        next if stop_words.include?(w.downcase)
-        words_frequency[w.downcase] += 1
-      end
-    end
-
-    results = {'words' => words_frequency }
-
-    results
-  end
-
-  NATS.start do
-
-    @offerings = 0
-
-    EM.add_periodic_timer(1) do
-      NATS.publish('pride-prejudice.discovery', INFO.to_json)
-    end
-
-    NATS.subscribe('pride-prejudice.requests') do |msg, reply, sub|
-      EM.add_timer(@offerings) { NATS.publish(reply, INFO.to_json) }
-      @offerings += 1 # decrease taint delay
-    end
-
-    NATS.subscribe("pride-prejudice.#{ID}.compute") do |msg, reply, sub|
-      job = JSON.parse(msg)
-
-      job_id, range = job
-      puts "[OK]        :: Start to work on (#{range['start']}:#{range['end']})"
-      results = compute(range)
-      @offerings -= 1 # delay ourselves according to the number of task being done
-
-      job_done = {
-       :id      => job_id,
-       :results => results
-      }
-      NATS.publish("pride-prejudice.responses", job_done.to_json)
-    end
-  end
-#+END_SRC
-
-**** Golang version
-
-***** Counter in Golang
+**** Counter in Golang
 
 #+BEGIN_SRC go :tangle src/prog-styles/map-reduce-via-nats-golang/run.go :mkdirp true :sleep 2
 package main
@@ -256,7 +195,7 @@ func main() {
 }
 #+END_SRC
 
-***** Dependencies
+**** Dependencies
 
 #+name: go-get-dependencies
 #+BEGIN_SRC sh :dir src/prog-styles/map-reduce-via-nats-golang
@@ -264,7 +203,7 @@ export GOPATH=`pwd`
 go get -d
 #+END_SRC
 
-***** Run
+**** Run
 
 #+name: run-frequency-counter
 #+BEGIN_SRC sh 
