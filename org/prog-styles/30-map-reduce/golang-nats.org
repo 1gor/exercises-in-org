@@ -2,6 +2,7 @@
 
 * TODO _
 ** COMMENT Implementation
+
 *** Start the NATS server
 
 #+name: nats-server
@@ -131,6 +132,12 @@ and reply with the partial computed frequency when done.
 
 Delay the start of the process so that the nats server and aggregator are ready.
 
+- Channels involved
+  + =pride-prejudice.discovery=
+  + =pride-prejudice.requests=
+  + =pride-prejudice.id.compute=
+  + =pride-prejudice.responses=
+
 **** COMMENT Ruby version
 
 #+name: frequency-counter
@@ -204,41 +211,49 @@ Delay the start of the process so that the nats server and aggregator are ready.
 ***** Counter in Golang
 
 #+BEGIN_SRC go :tangle src/prog-styles/map-reduce-via-nats-golang/run.go :mkdirp true :sleep 2
-  package main
+package main
 
-  import (
-          //        "runtime"  // needed for Goexit of goroutines
-          "log"
-          "time"
-          // "math/rand"
-          "github.com/apcera/nats"
-  )
+import (
+        //        "runtime"  // needed for Goexit of goroutines
+        "log"
+        "time"
+        "math/rand"
+        "github.com/apcera/nats"
+	  "encoding/json"
+)
 
-  const (
-          ID = "1"
-  )
+type Info struct {
+  Id int `json: id`
+}
 
-  func main() {
-          log.Println("Connecting to NATS...")
-          natsConnection, err := nats.Connect(nats.DefaultURL)
-          if err != nil {
-                  log.Fatalf("Could not connect!", err)
-          }
-          log.Println("Connected to NATS!", natsConnection)
+func main() {
 
-          // Periodic timer to send discovery messages every second
-          ticker := time.NewTicker(1 * time.Second)
-          go func() {
-            for {
-              select {
-              case <- ticker.C:
-                      natsConnection.Publish("pride-prejudice.discovery", []byte("TODO"))
-              }
-            }
-          }()
+  // Generating a info json string to announce
+  rand.Seed(time.Now().UTC().UnixNano())
+  id   := rand.Int()
+  info := Info{ id }
+  infoJSON, _ := json.Marshal(info)
 
-          time.Sleep(30 * time.Second) // timeout after 30 seconds
+  log.Println("Connecting to NATS at ", nats.DefaultURL)
+  natsConnection, err := nats.Connect(nats.DefaultURL)
+  if err != nil {
+    log.Fatalf("Could not connect!", err)
   }
+
+  // Periodic timer to send discovery messages every second
+  ticker := time.NewTicker(1 * time.Second)
+  go func() {
+    for {
+      select {
+      case <- ticker.C:
+        // How to send JSON...
+        natsConnection.Publish("pride-prejudice.discovery", infoJSON)
+      }
+    }
+  }()
+
+  time.Sleep(30 * time.Second) // timeout after 30 seconds
+}
 #+END_SRC
 
 ***** Dependencies
@@ -256,3 +271,28 @@ go get -d
 export GOPATH="`pwd`/src/prog-styles/map-reduce-via-nats-golang"
 go run src/prog-styles/map-reduce-via-nats-golang/run.go
 #+END_SRC
+*** Snippets
+
+#+BEGIN_SRC go :results output code
+package main
+
+import (
+  "fmt"
+  "math/rand"
+  "time"
+  "encoding/json"
+)
+
+type Info struct {
+  Id int `json:"id"`
+}
+
+func main() {
+  rand.Seed(time.Now().UTC().UnixNano())
+  id := rand.Int()
+  info := Info{ id }
+  infoJSON, _ := json.Marshal(info)
+  fmt.Println(string(infoJSON))
+}
+#+END_SRC
+
