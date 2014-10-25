@@ -3,7 +3,7 @@
 In this example we use the NATS messaging system to coordinate
 a number of processes to compute the term frequency.
 
-*** COMMENT Dependencies
+*** Dependencies
 
 #+begin_src ruby :tangle src/prog-styles/map-reduce-via-nats/Gemfile :mkdirp true
 source "https://rubygems.org"
