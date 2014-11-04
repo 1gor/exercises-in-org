@@ -1,10 +1,56 @@
-#+TITLE: Counting words in Clojure
+#+TITLE:  Counting words in Clojure
 
-#+BEGIN_SRC clojure :tangle  src/prog-styles/monolith-in-clojure/profiles.clj :mkdirp true
-{:user {:plugins [[cider/cider-nrepl "0.7.0"]]}}
+** Scaffold for development					   :noexport:
+
+*** TODO Project file for Clojure
+
+#+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/project.clj :mkdirp true
+  (defproject monolith "0.1.0-SNAPSHOT"
+    :description                        "FIXME: write description"
+    :url                                "http://example.com/FIXME"
+    :license { :name                     "Eclipse Public License"
+               :url                      "http://www.eclipse.org/legal/epl-v10.html"}
+    :dependencies   [[org.clojure/clojure "1.5.1"]]
+    :user {:plugins [[cider/cider-nrepl "0.7.0"]]}
+    :main monolith.core/monolith
+    )
 #+END_SRC
+
+*** COMMENT Create new project with leinigen 			   :noexport:
+
+#+name: lein-new
+#+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure
+lein new monolith
+#+END_SRC
+
+*** COMMENT Install plugins						   :noexport:
+
+#+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure/monolith
+# lein plugin install swank-clojure 1.4.3
+#+END_SRC
+
+** [0/3] Progress
+
+# - [ ] We should be able to do it in a transducers style
+- [ ] Read the stop words files
+- [ ] Create a map with those words
+- [ ] Read the pride and prejudice file and read the first line
+
+** Run it
 
 #+name: run-clojure
 #+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure/monolith
 lein run
+#+END_SRC
+
+** Program
+
+*** Reading the file
+
+#+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
+(ns monolith.core)
+
+(defn monolith []
+  (println "But I should be a monolith")
+  )
 #+END_SRC
