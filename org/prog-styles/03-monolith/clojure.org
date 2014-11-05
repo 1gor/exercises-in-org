@@ -1,9 +1,12 @@
 #+TITLE:  Counting words in Clojure
 #+options: todo:nil
 
-** Scaffold for development					   :noexport:
+** Development 							   :noexport:
 
-*** DONE Project file for Clojure
+*** Project file
+
+We include the =cider= plugin to start the server for evaling code blocks
+via Org Babel.
 
 #+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/project.clj :mkdirp true
 (defproject monolith "0.1.0-SNAPSHOT"
@@ -17,14 +20,14 @@
   )
 #+END_SRC
 
-*** Create new project with leinigen 			   :noexport:
+*** COMMENT Create new project with leinigen                       :noexport:
 
 #+name: lein-new
 #+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure
 lein new monolith
 #+END_SRC
 
-*** COMMENT Org Babel setup
+*** COMMENT Org Babel setup						   :noexport:
 
 - Open the ~project.clj~ and there do the ~M-x cider-jack-in~
 - Once having done that, code evaling should work
@@ -33,12 +36,81 @@ lein new monolith
   Which project should be patched?
   Probably there is a way to pass the jack-in option to cider before starting.
 
-** Run it
+** Program
+
+*** [100%] Progress
+
+- [X] Read the stop words files
+- [X] Create stop words map
+- [X] Read the pride and prejudice file and read the first line
+- [X] Read the sequence of words from the pride and prejudice file
+- [X] Skipping the stop words
+- [X] Count the words
+- [X] Sort the words in the map
+- [X] Print the top 25
+- [X] Pass the test
+
+*** Namespace
+
+#+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
+(ns monolith.core)
+#+END_SRC
+
+*** The Monolith
+
+For the Clojure example, we put everything into one =let=.
+
+#+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
+  (System/setProperty "user.dir" "./../../../exercises-in-programming-style/")
+  (def stop-words-file      (clojure.java.io/file (System/getProperty "user.dir") "stop_words.txt"))
+  (def pride-prejudice-file (clojure.java.io/file (System/getProperty "user.dir") "pride-and-prejudice.txt"))
+
+  (defn monolith []
+    (with-open [reader (clojure.java.io/reader pride-prejudice-file)]
+      (let [lines (line-seq reader)
+            stop-words (clojure.string/split (slurp stop-words-file) #",")
+            words (clojure.string/split
+                   (clojure.string/replace
+                    (clojure.string/lower-case lines) ;; the line
+                    #"[^a-zA-Z0-9]" " " ; remove non-alphanumerical
+                    )
+                   #" ")
+            word-count (reduce (fn [counter word]
+                                 (inc counter)
+                                 ) 0 words)
+            filtered-words (filter #(not
+                                     (or (some #{%1} stop-words)
+                                         (= %1 "")
+                                         )) words)
+            word-frequency-list (reduce (fn [word-frequency word]
+                                          (update-in word-frequency [word] (fnil inc 0))
+                                          )
+                                        {} filtered-words)
+            sorted-word-frequency-list (into (sorted-map-by
+                                              #(compare [(get word-frequency-list %2) %2]
+                                                        [(get word-frequency-list %1) %1]))
+                                             word-frequency-list)
+            ]
+        (doseq [word-pair (take 25 sorted-word-frequency-list)]
+          (print (key word-pair) " - " (val word-pair))
+          (println "")
+          )
+        )
+      )
+    )
+#+END_SRC
+
+I want to cwd to somewhere and print the path:
+
+** Run
 
 #+name: run-clojure
 #+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure/monolith
 lein run
 #+END_SRC
+
+#+RESULTS:
+#+include: "org/prog-styles/results.org"
 
 *** COMMENT Take care of formatting
 
@@ -52,7 +124,7 @@ Using Emacs for Mac OS X:
 #+name: indent-tangled-files
 #+BEGIN_SRC sh :results output
 EMACS="/Applications/Emacs.app/Contents/MacOS/Emacs"
-for f in `find src/prog-styles/monolith-in-clojure/monolith -name *.clj`; do 
+for f in `find src/prog-styles/monolith-in-clojure/monolith -name *.clj`; do
   echo "Visiting $f"
   $EMACS --batch --eval "
   (progn
@@ -69,109 +141,3 @@ done
 : Finished indenting the files!
 
 **** TODO linux
-** COMMENT Program
-
-*** [100%] Progress
-
-# - [ ] We should be able to do it in a transducers style since it is Clojure after all
-- [X] Read the stop words files
-- [X] Create stop words map
-- [X] Read the pride and prejudice file and read the first line
-- [X] Read the sequence of words from the pride and prejudice file
-- [X] Skipping the stop words
-- [X] Count the words
-- [X] Sort the words in the map
-- [X] Print the top 25
-
-*** Namespace
-
-#+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
-(ns monolith.core)
-#+END_SRC
-
-*** The Monolith
-
-For the Clojure example, we put everything into one =let=.
-
-#+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
-
-(defn monolith []
-  "TODO"
-  )
-#+END_SRC
-
-I want to cwd to somewhere and print the path:
-
-** DONE The prototype step
-
-#+begin_src clojure :results output :exports both
-  (System/setProperty "user.dir" "./../../../exercises-in-programming-style/")
-
-  (def stop-words-file 
-    (clojure.java.io/file (System/getProperty "user.dir") "stop_words.txt"))
-
-  (def stop-words
-    (clojure.string/split (slurp stop-words-file) #","))
-
-  (def pride-prejudice-file 
-    (clojure.java.io/file (System/getProperty "user.dir") "pride-and-prejudice.txt"))
-
-  (with-open [reader (clojure.java.io/reader pride-prejudice-file)]
-    (let [lines (line-seq reader)
-          words (clojure.string/split
-                 (clojure.string/replace
-                  (clojure.string/lower-case lines) ;; the line
-                  #"[^a-zA-Z0-9]" " " ; remove non-alphanumerical
-                  )
-                 #" ")
-          word-count (reduce (fn [counter word]
-                               (inc counter)
-                               ) 0 words)
-          filtered-words (filter #(not 
-	                            (or (some #{%1} stop-words)
-				        (= %1 "")
-				    )) words)
-          word-frequency-list (reduce (fn [word-frequency word]
-                                        (update-in word-frequency [word] (fnil inc 0))
-                                      )
-                                      {} filtered-words)
-         sorted-word-frequency-list (into (sorted-map-by
-                                      #(compare [(get word-frequency-list %2) %2]
-                                                [(get word-frequency-list %1) %1]))
-                                       word-frequency-list)]
-         (doseq [word-pair (take 25 sorted-word-frequency-list)]
-           (print (key word-pair) " - " (val word-pair))
-           (println "")
-         )
-    )
-  )
-#+end_src
-
-#+RESULTS:
-#+begin_example
-mr   -   786
-s   -   661
-elizabeth   -   635
-very   -   488
-darcy   -   418
-such   -   395
-mrs   -   343
-much   -   329
-more   -   327
-bennet   -   323
-bingley   -   306
-jane   -   295
-miss   -   283
-one   -   275
-know   -   239
-before   -   229
-herself   -   227
-though   -   226
-well   -   224
-never   -   220
-sister   -   218
-soon   -   216
-think   -   211
-now   -   209
-time   -   203
-#+end_example
