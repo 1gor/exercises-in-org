@@ -1,40 +1,37 @@
 #+TITLE:  Counting words in Clojure
+#+options: todo:nil
 
 ** Scaffold for development					   :noexport:
 
-*** TODO Project file for Clojure
+*** DONE Project file for Clojure
 
 #+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/project.clj :mkdirp true
-  (defproject monolith "0.1.0-SNAPSHOT"
-    :description                        "FIXME: write description"
-    :url                                "http://example.com/FIXME"
-    :license { :name                     "Eclipse Public License"
-               :url                      "http://www.eclipse.org/legal/epl-v10.html"}
-    :dependencies   [[org.clojure/clojure "1.5.1"]]
-    :user {:plugins [[cider/cider-nrepl "0.7.0"]]}
-    :main monolith.core/monolith
-    )
+(defproject monolith "0.1.0-SNAPSHOT"
+  :description      "FIXME: write description"
+  :url              "http://example.com/FIXME"
+  :license { :name  "Eclipse Public License"
+             :url   "http://www.eclipse.org/legal/epl-v10.html" }
+  :dependencies   [[org.clojure/clojure "1.5.1"]]
+  :plugins        [[cider/cider-nrepl "0.8.0-SNAPSHOT"]]
+  :main monolith.core/monolith
+  )
 #+END_SRC
 
-*** COMMENT Create new project with leinigen 			   :noexport:
+*** Create new project with leinigen 			   :noexport:
 
 #+name: lein-new
 #+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure
 lein new monolith
 #+END_SRC
 
-*** COMMENT Install plugins						   :noexport:
+*** COMMENT Org Babel setup
 
-#+BEGIN_SRC sh :dir src/prog-styles/monolith-in-clojure/monolith
-# lein plugin install swank-clojure 1.4.3
-#+END_SRC
+- Open the ~project.clj~ and there do the ~M-x cider-jack-in~
+- Once having done that, code evaling should work
 
-** [0/3] Progress
-
-# - [ ] We should be able to do it in a transducers style
-- [ ] Read the stop words files
-- [ ] Create a map with those words
-- [ ] Read the pride and prejudice file and read the first line
+- Is there a way to cider-jack-in from a certain directory?
+  Which project should be patched?
+  Probably there is a way to pass the jack-in option to cider before starting.
 
 ** Run it
 
@@ -43,14 +40,287 @@ lein new monolith
 lein run
 #+END_SRC
 
-** Program
+*** COMMENT Take care of formatting
 
-*** Reading the file
+**** DONE os x
+:PROPERTIES:
+:platform:  osx
+:END:
+
+Using Emacs for Mac OS X:
+
+#+name: indent-tangled-files
+#+BEGIN_SRC sh :results output
+EMACS="/Applications/Emacs.app/Contents/MacOS/Emacs"
+for f in `find src/prog-styles/monolith-in-clojure/monolith -name *.clj`; do 
+  echo "Visiting $f"
+  $EMACS --batch --eval "
+  (progn
+    (load \"~/.emacs\")
+    (message \"=========== INDENTING FILE: $f ===========\")
+    (find-file \"$f\")
+    (indent-region (point-min) (point-max) nil)
+    (save-buffer)
+  )"
+done
+#+END_SRC
+
+#+RESULTS: indent-region
+: Finished indenting the files!
+
+**** TODO linux
+** COMMENT Program
+
+*** [87%] Progress
+
+# - [ ] We should be able to do it in a transducers style since it is Clojure after all
+- [X] Read the stop words files
+- [X] Create stop words map
+- [X] Read the pride and prejudice file and read the first line
+- [X] Read the sequence of words from the pride and prejudice file
+- [ ] Skipping the stop words
+- [X] Count the words
+- [X] Sort the words in the map
+- [X] Print the top 25
+
+*** Namespace
 
 #+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
 (ns monolith.core)
+#+END_SRC
+
+*** The Monolith
+
+#+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
 
 (defn monolith []
-  (println "But I should be a monolith")
-  )
+  (println "Start of the Monolith program!!!"))
+
 #+END_SRC
+
+I want to cwd to somewhere and print the path:
+
+** COMMENT The prototype step
+
+*** First prototype
+
+#+begin_src clojure :results output
+  ;; (println "Changing the current directory...")
+
+  (System/setProperty "user.dir" "/Users/mariko/Dropbox/repos/exercises-in-org/src/prog-styles/monolith-in-clojure/monolith")
+  (System/setProperty "user.dir" "./../../../exercises-in-programming-style/")
+
+  ;; (println (System/getProperty "user.dir"))
+
+  (def ten-files
+    (take 10
+     (file-seq
+      (clojure.java.io/file
+       (System/getProperty "user.dir")
+       ))))
+
+  ;; (doseq [f ten-files]
+  ;;   (println f))
+
+  (def stop-words-file (clojure.java.io/file (System/getProperty "user.dir") "stop_words.txt"))
+  (def stop-words-list (clojure.string/split (slurp stop-words-file) #","))
+  (def pride-prejudice-file (clojure.java.io/file (System/getProperty "user.dir") "pride-and-prejudice.txt"))
+
+  ;; Now read the file and create a map out of it
+  ;; 
+  ;; read the file line per line (take 10 lines)a
+
+  ;; (with-open [lines (clojure.java.io/reader pride-prejudice-file)]
+  ;;   (println (count (line-seq lines)))
+  ;; )
+
+  ;; map to increment the words
+  (def pride-prejudice-words {})
+
+  (with-open [reader (clojure.java.io/reader pride-prejudice-file)]
+    (doseq [line (take 10 (line-seq reader))]
+       ;; remove anything in [^a-zA-Z0-9]
+
+       ;; here we have to store the words
+       (doseq [word (clojure.string/split
+		       (clojure.string/replace
+		        (clojure.string/lower-case line)
+		     #"[^a-zA-Z0-9]" " "
+		    )
+		    #" ")]
+		    ;; ignore empty lines and stop words
+		    (cond
+		      (some #{word} stop-words-list) (println "skipping...")
+		      (= word "") (println "ignoring whitespace...")
+		      :else (
+		        ;; insert into the map and increment
+		      )
+		    )
+      )
+    ))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+ignoring whitespace...
+skipping...
+skipping...
+skipping...
+ignoring whitespace...
+skipping...
+ignoring whitespace...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+ignoring whitespace...
+ignoring whitespace...
+skipping...
+skipping...
+skipping...
+ignoring whitespace...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+skipping...
+ignoring whitespace...
+ignoring whitespace...
+ignoring whitespace...
+skipping...
+ignoring whitespace...
+#+end_example
+
+#+BEGIN_SRC clojure :results output code
+  ;; include a key and a value
+  (def h {})
+  (def h2 (assoc h "word" 0))
+
+  (println h)
+  (println h2)
+
+  ;; Mini count words
+  (def words "Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum.")
+
+  (def word-frequency {})
+
+  ;; (println
+  ;;   (reduce
+  ;;     (fn [word-frequency word]
+  ;;       (update-in word-frequency [word] (fnil inc 0))
+  ;;     )
+  ;;   word-frequency
+  ;;   (clojure.string/split words #" ") ;; reduce parameter
+  ;;   )
+  ;; )
+
+  (def word-frequency 
+    (reduce
+      #(update-in %1 [%2] (fnil inc 0))
+      word-frequency
+      (clojure.string/split words #" ") ;; reduce parameter
+  ))
+
+  ;; (println word-frequency)
+
+  ;; Now sort it
+  (println
+    (into (sorted-map-by
+           #(compare [(get word-frequency %2) %2]
+                     [(get word-frequency %1) %1]))
+          word-frequency)
+   )
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC clojure
+{}
+{word 0}
+{in 3, ut 2, dolore 2, dolor 2, voluptate 1, veniam 1, velit 1, ullamco 1, tempor 1, sunt 1, sit 1, sint 1, sed 1, reprehenderit 1, quis 1, qui 1, proident 1, pariatur. 1, officia 1, occaecat 1, nulla 1, nostrud 1, non 1, nisi 1, mollit 1, minim 1, magna 1, laborum. 1, laboris 1, labore 1, irure 1, ipsum 1, incididunt 1, id 1, fugiat 1, exercitation 1, ex 1, eu 1, et 1, est 1, esse 1, enimad 1, elit 1, eiusmod 1, ea 1, do 1, deserunt 1, cupidatat 1, culpa 1, consequat. 1, consectetur 1, commodo 1, cillum 1, aute 1, anim 1, amet 1, aliquip 1, aliqua. 1, adipisicing 1, Ut 1, Lorem 1, Excepteur 1, Duis 1}
+nil
+#+END_SRC
+
+*** Second prototype
+
+#+begin_src clojure :results output
+  (System/setProperty "user.dir" "./../../../exercises-in-programming-style/")
+
+  (def stop-words-file (clojure.java.io/file (System/getProperty "user.dir") "stop_words.txt"))
+  (def stop-words-list (clojure.string/split (slurp stop-words-file) #","))
+  (def pride-prejudice-file (clojure.java.io/file (System/getProperty "user.dir") "pride-and-prejudice.txt"))
+  (def pride-prejudice-words {})
+
+  (with-open [reader (clojure.java.io/reader pride-prejudice-file)]
+    (let [lines (line-seq reader)
+          words (clojure.string/split
+                 (clojure.string/replace
+                  (clojure.string/lower-case lines) ;; the line
+                  #"[^a-zA-Z0-9]" " " ; remove non-alphanumerical
+                  )
+                 #" ")
+
+          word-count (reduce (fn [counter word]
+                               (inc counter)
+                               ) 0 words)
+          
+          word-frequency-list (reduce (fn [word-frequency word]
+                                      ;; (if-not (= word "")
+                                      ;;   (or (neg? (some #{word} stop-words-list))
+                                          (update-in word-frequency [word] (fnil inc 0))
+                                        )
+                                      ;;))
+                                      {} words)
+         sorted-word-frequency-list (into (sorted-map-by
+                                      #(compare [(get word-frequency-list %2) %2]
+                                                [(get word-frequency-list %1) %1]))
+                                       word-frequency-list)
+                               ]
+         (doseq [word-pair (take 25 sorted-word-frequency-list)]
+           (print (key word-pair) "  -  " (val word-pair))
+           (println "")
+         )
+    )
+  )
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   -   56486
+the   -   4507
+to   -   4243
+of   -   3728
+and   -   3658
+her   -   2225
+i   -   2070
+a   -   2012
+in   -   1937
+was   -   1848
+she   -   1710
+that   -   1594
+it   -   1550
+not   -   1450
+you   -   1428
+he   -   1339
+his   -   1271
+be   -   1260
+as   -   1191
+had   -   1176
+with   -   1100
+for   -   1086
+but   -   1007
+is   -   886
+have   -   847
+#+end_example
+
