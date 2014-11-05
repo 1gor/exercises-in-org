@@ -100,8 +100,6 @@ For the Clojure example, we put everything into one =let=.
     )
 #+END_SRC
 
-I want to cwd to somewhere and print the path:
-
 ** Run
 
 #+name: run-clojure
@@ -141,3 +139,4 @@ done
 : Finished indenting the files!
 
 **** TODO linux
+
