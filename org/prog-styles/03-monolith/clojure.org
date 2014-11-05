@@ -91,170 +91,20 @@ done
 
 *** The Monolith
 
+For the Clojure example, we put everything into one =let=.
+
 #+BEGIN_SRC clojure :tangle src/prog-styles/monolith-in-clojure/monolith/src/monolith/core.clj :mkdirp true
 
 (defn monolith []
-  (println "Start of the Monolith program!!!"))
-
+  "TODO"
+  )
 #+END_SRC
 
 I want to cwd to somewhere and print the path:
 
-** COMMENT The prototype step
+** The prototype step
 
-*** First prototype
-
-#+begin_src clojure :results output
-  ;; (println "Changing the current directory...")
-
-  (System/setProperty "user.dir" "/Users/mariko/Dropbox/repos/exercises-in-org/src/prog-styles/monolith-in-clojure/monolith")
-  (System/setProperty "user.dir" "./../../../exercises-in-programming-style/")
-
-  ;; (println (System/getProperty "user.dir"))
-
-  (def ten-files
-    (take 10
-     (file-seq
-      (clojure.java.io/file
-       (System/getProperty "user.dir")
-       ))))
-
-  ;; (doseq [f ten-files]
-  ;;   (println f))
-
-  (def stop-words-file (clojure.java.io/file (System/getProperty "user.dir") "stop_words.txt"))
-  (def stop-words-list (clojure.string/split (slurp stop-words-file) #","))
-  (def pride-prejudice-file (clojure.java.io/file (System/getProperty "user.dir") "pride-and-prejudice.txt"))
-
-  ;; Now read the file and create a map out of it
-  ;; 
-  ;; read the file line per line (take 10 lines)a
-
-  ;; (with-open [lines (clojure.java.io/reader pride-prejudice-file)]
-  ;;   (println (count (line-seq lines)))
-  ;; )
-
-  ;; map to increment the words
-  (def pride-prejudice-words {})
-
-  (with-open [reader (clojure.java.io/reader pride-prejudice-file)]
-    (doseq [line (take 10 (line-seq reader))]
-       ;; remove anything in [^a-zA-Z0-9]
-
-       ;; here we have to store the words
-       (doseq [word (clojure.string/split
-		       (clojure.string/replace
-		        (clojure.string/lower-case line)
-		     #"[^a-zA-Z0-9]" " "
-		    )
-		    #" ")]
-		    ;; ignore empty lines and stop words
-		    (cond
-		      (some #{word} stop-words-list) (println "skipping...")
-		      (= word "") (println "ignoring whitespace...")
-		      :else (
-		        ;; insert into the map and increment
-		      )
-		    )
-      )
-    ))
-#+end_src
-
-#+RESULTS:
-#+begin_example
-ignoring whitespace...
-skipping...
-skipping...
-skipping...
-ignoring whitespace...
-skipping...
-ignoring whitespace...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-ignoring whitespace...
-ignoring whitespace...
-skipping...
-skipping...
-skipping...
-ignoring whitespace...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-skipping...
-ignoring whitespace...
-ignoring whitespace...
-ignoring whitespace...
-skipping...
-ignoring whitespace...
-#+end_example
-
-#+BEGIN_SRC clojure :results output code
-  ;; include a key and a value
-  (def h {})
-  (def h2 (assoc h "word" 0))
-
-  (println h)
-  (println h2)
-
-  ;; Mini count words
-  (def words "Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum.")
-
-  (def word-frequency {})
-
-  ;; (println
-  ;;   (reduce
-  ;;     (fn [word-frequency word]
-  ;;       (update-in word-frequency [word] (fnil inc 0))
-  ;;     )
-  ;;   word-frequency
-  ;;   (clojure.string/split words #" ") ;; reduce parameter
-  ;;   )
-  ;; )
-
-  (def word-frequency 
-    (reduce
-      #(update-in %1 [%2] (fnil inc 0))
-      word-frequency
-      (clojure.string/split words #" ") ;; reduce parameter
-  ))
-
-  ;; (println word-frequency)
-
-  ;; Now sort it
-  (println
-    (into (sorted-map-by
-           #(compare [(get word-frequency %2) %2]
-                     [(get word-frequency %1) %1]))
-          word-frequency)
-   )
-#+END_SRC
-
-#+RESULTS:
-#+BEGIN_SRC clojure
-{}
-{word 0}
-{in 3, ut 2, dolore 2, dolor 2, voluptate 1, veniam 1, velit 1, ullamco 1, tempor 1, sunt 1, sit 1, sint 1, sed 1, reprehenderit 1, quis 1, qui 1, proident 1, pariatur. 1, officia 1, occaecat 1, nulla 1, nostrud 1, non 1, nisi 1, mollit 1, minim 1, magna 1, laborum. 1, laboris 1, labore 1, irure 1, ipsum 1, incididunt 1, id 1, fugiat 1, exercitation 1, ex 1, eu 1, et 1, est 1, esse 1, enimad 1, elit 1, eiusmod 1, ea 1, do 1, deserunt 1, cupidatat 1, culpa 1, consequat. 1, consectetur 1, commodo 1, cillum 1, aute 1, anim 1, amet 1, aliquip 1, aliqua. 1, adipisicing 1, Ut 1, Lorem 1, Excepteur 1, Duis 1}
-nil
-#+END_SRC
-
-*** Second prototype
-
-#+begin_src clojure :results output
+#+begin_src clojure :results output :exports both
   (System/setProperty "user.dir" "./../../../exercises-in-programming-style/")
 
   (def stop-words-file (clojure.java.io/file (System/getProperty "user.dir") "stop_words.txt"))
@@ -276,11 +126,8 @@ nil
                                ) 0 words)
           
           word-frequency-list (reduce (fn [word-frequency word]
-                                      ;; (if-not (= word "")
-                                      ;;   (or (neg? (some #{word} stop-words-list))
-                                          (update-in word-frequency [word] (fnil inc 0))
-                                        )
-                                      ;;))
+                                        (update-in word-frequency [word] (fnil inc 0))
+                                      )
                                       {} words)
          sorted-word-frequency-list (into (sorted-map-by
                                       #(compare [(get word-frequency-list %2) %2]
